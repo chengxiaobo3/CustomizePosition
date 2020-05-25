@@ -67,6 +67,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.imageViewIcon.setImageResource(list.get(position).drawableId);
         holder.imageViewIcon.setTag(position);
+        holder.flIvContainer.setTag(position);
 
     }
 
@@ -94,4 +95,5 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
         void OnItemFocusChange(MyApplicationBean myApplicationBean, View view, boolean hasFocus);
     }
+
 }

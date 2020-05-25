@@ -1,5 +1,9 @@
 package com.example.customizeposition.view;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -7,6 +11,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewPropertyAnimator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -29,6 +34,7 @@ public class CustomizePositionFrameLayout extends FrameLayout {
     private FrameLayout mFlTip;
     private ImageView mIvTip;
     private MyAdapter mMyAdapter;
+    private boolean isEdit = false;
 
     private final String TAG = "CustomizePositionLayout";
 
@@ -53,6 +59,8 @@ public class CustomizePositionFrameLayout extends FrameLayout {
         mRecyclerView = findViewById(R.id.recyclerView);
         mFlTip = findViewById(R.id.fl_tip);
         mIvTip = findViewById(R.id.iv_tip);
+        mIvTip.setScaleX(1.2f);
+        mIvTip.setScaleY(1.2f);
         mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 4));
         mRecyclerView.addItemDecoration(new ItemDecoration());
 
@@ -68,8 +76,7 @@ public class CustomizePositionFrameLayout extends FrameLayout {
                 mIvTip.setImageResource(myApplicationBean.drawableId);
                 mIvTip.setTranslationX(view.getX());
                 mIvTip.setTranslationY(view.getY());
-                mIvTip.setScaleX(1.2f);
-                mIvTip.setScaleY(1.2f);
+                isEdit = true;
             }
 
             @Override
@@ -96,7 +103,7 @@ public class CustomizePositionFrameLayout extends FrameLayout {
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (mRecyclerView.hasFocus()) {
+        if (mRecyclerView.hasFocus() && isEdit) {
             switch (keyCode) {
                 case KeyEvent.KEYCODE_DPAD_LEFT:
                     return dealKeyEvent(FOCUS_LEFT);
@@ -117,23 +124,25 @@ public class CustomizePositionFrameLayout extends FrameLayout {
 
     private boolean dealKeyEvent(int direction) {
         View view = mRecyclerView.findFocus();
+        log("mRecyclerView.findFocus(): " + view);
         if (view != null) {
             int oldPosition = (int) view.getTag();
             if (view instanceof ImageView) {
                 View nextFocusView = view.focusSearch(direction);
-                if (nextFocusView instanceof ImageView) {
+                log("nextFocusView: " + nextFocusView);
+                if (nextFocusView != null) {
                     int newPosition = (int) nextFocusView.getTag();
                     nextFocusView.requestFocus();
+                    log("oldPosition: " + oldPosition + "  newPosition:" + newPosition);
                     changeFocus(oldPosition, newPosition);
                     return true;
                 }
-
             }
         }
         return false;
     }
 
-    private void changeFocus(int oldPosition, final int newPosition) {
+    private void changeFocus(final int oldPosition, final int newPosition) {
         mMyAdapter.changePosition(oldPosition, newPosition);
         mRecyclerView.post(new Runnable() {
             @Override
@@ -141,17 +150,45 @@ public class CustomizePositionFrameLayout extends FrameLayout {
                 MyAdapter.ViewHolder viewHolder = (MyAdapter.ViewHolder) mRecyclerView.findViewHolderForAdapterPosition(newPosition);
                 if (viewHolder != null) {
                     viewHolder.imageViewIcon.requestFocus();
-                    mIvTip.setTranslationX(viewHolder.flIvContainer.getX());
                     float y = viewHolder.flIvContainer.getY();
                     if (y < 0) {
                         y = 0;
                     } else if (y > mRecyclerView.getHeight() - viewHolder.flIvContainer.getHeight()) {
                         y = mRecyclerView.getHeight() - viewHolder.flIvContainer.getHeight();
                     }
-                    mIvTip.setTranslationY(y);
-                    mIvTip.setScaleX(1.2f);
-                    mIvTip.setScaleY(1.2f);
+                    mIvTip.animate().translationX(viewHolder.flIvContainer.getX()).translationY(y).setDuration(500).start();
+
                 }
+            }
+        });
+    }
+
+    private void doAnimator(View view, float translateX, float translateY, final int oldPosition, final int newPosition) {
+        ObjectAnimator translateXAnimator = ObjectAnimator.ofFloat(view, "translationX", view.getTranslationX(), translateX);
+        ObjectAnimator translateYAnimator = ObjectAnimator.ofFloat(view, "translationY", view.getTranslationY(), translateY);
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(translateXAnimator, translateYAnimator);
+        animatorSet.setDuration(500);
+        animatorSet.start();
+        animatorSet.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mMyAdapter.changePosition(oldPosition, newPosition);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
             }
         });
     }
