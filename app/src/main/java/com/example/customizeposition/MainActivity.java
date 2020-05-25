@@ -3,6 +3,7 @@ package com.example.customizeposition;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.view.KeyEvent;
 
 import com.example.customizeposition.view.CustomizePositionFrameLayout;
 import com.example.customizeposition.view.MyAdapter;
@@ -31,5 +32,13 @@ public class MainActivity extends AppCompatActivity {
         }
         mCustomizePositionFrameLayout.setAdapter(new MyAdapter(list));
 
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (mCustomizePositionFrameLayout.onKeyDown(keyCode, event)) {
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

@@ -31,6 +31,14 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         this.list = list;
     }
 
+    public void changePosition(int position1, int position2) {
+        MyApplicationBean myApplicationBean = list.get(position1);
+        list.set(position1, list.get(position2));
+        list.set(position2, myApplicationBean);
+        list.set(position2, myApplicationBean);
+        this.notifyDataSetChanged();
+    }
+
 
     @NonNull
     @Override
@@ -49,10 +57,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         viewHolder.imageViewIcon.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (itemListener != null) {
-                    int position = viewHolder.getAdapterPosition();
-                    itemListener.OnItemFocusChange(list.get(position), viewHolder.flIvContainer, hasFocus);
-                }
             }
         });
 
@@ -62,6 +66,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.imageViewIcon.setImageResource(list.get(position).drawableId);
+        holder.imageViewIcon.setTag(position);
 
     }
 
@@ -72,8 +77,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
     static class ViewHolder extends RecyclerView.ViewHolder {
 
-        private ImageView imageViewIcon;
-        private FrameLayout flIvContainer;
+        public ImageView imageViewIcon;
+        public FrameLayout flIvContainer;
 
 
         public ViewHolder(@NonNull View itemView) {
