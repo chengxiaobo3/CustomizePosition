@@ -44,30 +44,32 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         final ViewHolder viewHolder = new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.view_recyclerview_item, parent, false));
-        viewHolder.imageViewIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (itemListener != null) {
-                    int position = viewHolder.getAdapterPosition();
-                    itemListener.onItemClick(list.get(position), viewHolder.flIvContainer);
-                }
-            }
-        });
-
-        viewHolder.imageViewIcon.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-            }
-        });
-
         return viewHolder;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
         holder.imageViewIcon.setImageResource(list.get(position).drawableId);
         holder.imageViewIcon.setTag(position);
         holder.flIvContainer.setTag(position);
+
+        holder.imageViewIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (itemListener != null) {
+                    itemListener.onItemClick(list.get(position), holder.flIvContainer);
+                }
+            }
+        });
+
+        holder.imageViewIcon.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (itemListener != null) {
+                    itemListener.OnItemFocusChange(list.get(position), holder.flIvContainer, hasFocus, position);
+                }
+            }
+        });
 
     }
 
@@ -93,7 +95,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     public interface ItemListener {
         void onItemClick(MyApplicationBean myApplicationBean, View view);
 
-        void OnItemFocusChange(MyApplicationBean myApplicationBean, View view, boolean hasFocus);
+        void OnItemFocusChange(MyApplicationBean myApplicationBean, View view, boolean hasFocus, int position);
     }
 
 }

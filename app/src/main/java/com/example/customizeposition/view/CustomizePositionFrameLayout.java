@@ -35,6 +35,7 @@ public class CustomizePositionFrameLayout extends FrameLayout {
     private ImageView mIvTip;
     private MyAdapter mMyAdapter;
     private boolean isEdit = false;
+    private RecyclerView.LayoutManager mLayoutManager;
 
     private final String TAG = "CustomizePositionLayout";
 
@@ -61,7 +62,8 @@ public class CustomizePositionFrameLayout extends FrameLayout {
         mIvTip = findViewById(R.id.iv_tip);
         mIvTip.setScaleX(1.2f);
         mIvTip.setScaleY(1.2f);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 4));
+        mLayoutManager = new GridLayoutManager(getContext(), 4);
+        mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.addItemDecoration(new ItemDecoration());
 
     }
@@ -77,10 +79,14 @@ public class CustomizePositionFrameLayout extends FrameLayout {
                 mIvTip.setTranslationX(view.getX());
                 mIvTip.setTranslationY(view.getY());
                 isEdit = true;
+
+//                MyAdapter.ViewHolder viewHolder = (MyAdapter.ViewHolder) mRecyclerView.findViewHolderForAdapterPosition(15);
+//                log("click: " + viewHolder);
             }
 
             @Override
-            public void OnItemFocusChange(MyApplicationBean myApplicationBean, final View view, boolean hasFocus) {
+            public void OnItemFocusChange(MyApplicationBean myApplicationBean, final View view, boolean hasFocus, int position) {
+//                mLayoutManager.scrollToPosition(position);
             }
         });
         mRecyclerView.post(new Runnable() {
@@ -113,6 +119,7 @@ public class CustomizePositionFrameLayout extends FrameLayout {
                     return dealKeyEvent(FOCUS_UP);
                 case KeyEvent.KEYCODE_DPAD_DOWN:
                     return dealKeyEvent(FOCUS_DOWN);
+
             }
         }
         return false;
@@ -136,8 +143,12 @@ public class CustomizePositionFrameLayout extends FrameLayout {
                     log("oldPosition: " + oldPosition + "  newPosition:" + newPosition);
                     changeFocus(oldPosition, newPosition);
                     return true;
+                } else {
+                    log("error: nextFocus null");
                 }
             }
+        } else {
+            log("error: mRecyclerView.findFocus() null");
         }
         return false;
     }
@@ -150,6 +161,8 @@ public class CustomizePositionFrameLayout extends FrameLayout {
                 MyAdapter.ViewHolder viewHolder = (MyAdapter.ViewHolder) mRecyclerView.findViewHolderForAdapterPosition(newPosition);
                 if (viewHolder != null) {
                     viewHolder.imageViewIcon.requestFocus();
+//                    mLayoutManager.scrollToPosition((int) viewHolder.imageViewIcon.getTag());
+
                     float y = viewHolder.flIvContainer.getY();
                     if (y < 0) {
                         y = 0;
