@@ -86,7 +86,21 @@ public class CustomizePositionFrameLayout extends FrameLayout {
 
             @Override
             public void OnItemFocusChange(MyApplicationBean myApplicationBean, final View view, boolean hasFocus, int position) {
-//                mLayoutManager.scrollToPosition(position);
+                if (hasFocus) {
+                    mLayoutManager.scrollToPosition(position);
+                    ViewYChangeListener listener = new ViewYChangeListener(view, new ViewYChangeListener.ViewYCallBack() {
+                        @Override
+                        public void onFinish() {
+                            log(view.getTag() + "   ViewYChangeListener:  onFinish");
+                        }
+
+                        @Override
+                        public void onYChange(float y) {
+                            log(view.getTag() + "   onYChange:  Y: " + y);
+                        }
+                    });
+                    listener.start();
+                }
             }
         });
         mRecyclerView.post(new Runnable() {
