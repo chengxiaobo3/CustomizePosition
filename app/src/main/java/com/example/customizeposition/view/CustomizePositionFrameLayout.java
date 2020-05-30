@@ -10,6 +10,7 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.leanback.widget.VerticalGridView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,10 +24,11 @@ import com.example.customizeposition.Util.Util;
  */
 public class CustomizePositionFrameLayout extends FrameLayout {
 
-    private RecyclerView mRecyclerView;
+    private VerticalGridView mRecyclerView;
     private FrameLayout mFlTip;
     private ImageView mIvTip;
     private MyAdapter mMyAdapter;
+    private View mCurrentFocusView;
 
     public CustomizePositionFrameLayout(@NonNull Context context) {
         super(context);
@@ -49,8 +51,22 @@ public class CustomizePositionFrameLayout extends FrameLayout {
         mRecyclerView = findViewById(R.id.recyclerView);
         mFlTip = findViewById(R.id.fl_tip);
         mIvTip = findViewById(R.id.iv_tip);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 4));
+        mIvTip.setScaleX(1.2f);
+        mIvTip.setScaleY(1.2f);
         mRecyclerView.addItemDecoration(new ItemDecoration());
+        mRecyclerView.setNumColumns(4);
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                if (mFlTip.getVisibility() == View.VISIBLE && mCurrentFocusView != null) {
+                    mIvTip.setTranslationX(mCurrentFocusView.getX());
+                    mIvTip.setTranslationY(mCurrentFocusView.getY());
+                }
+            }
+        });
     }
 
     public void setAdapter(final MyAdapter myAdapter) {
@@ -63,19 +79,15 @@ public class CustomizePositionFrameLayout extends FrameLayout {
                 mIvTip.setImageResource(myApplicationBean.drawableId);
                 mIvTip.setTranslationX(view.getX());
                 mIvTip.setTranslationY(view.getY());
-                mIvTip.setScaleX(1.2f);
-                mIvTip.setScaleY(1.2f);
+
             }
 
             @Override
             public void OnItemFocusChange(MyApplicationBean myApplicationBean, final View view, boolean hasFocus) {
-
                 if (hasFocus) {
-
+                    mCurrentFocusView = view;
                     mIvTip.setTranslationX(view.getX());
                     mIvTip.setTranslationY(view.getY());
-                    mIvTip.setScaleX(1.2f);
-                    mIvTip.setScaleY(1.2f);
                 }
             }
         });
